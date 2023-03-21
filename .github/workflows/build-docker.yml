@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GOOGLECREDENTIALS }}'
+      - uses: RafikFarhad/push-to-gcr-github-action@v5-beta
+        with:
+          # gcloud_service_key: ${{ secrets.GCLOUD_SERVICE_KEY }} # can be base64 encoded or plain text || not needed if you use google-github-actions/auth
+          registry: gcr.io
+          project_id: gd-gcp-hm-fm-sandbox
+          image_name: veljko-nginx
+          image_tag: ${{ env.GITHUB_SHA }}
+          dockerfile: ./cicd/docker/Dockerfile
+          context: ./cicd/docker
+#      - name: Build the Docker image
+#        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
